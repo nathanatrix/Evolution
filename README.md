@@ -1,0 +1,3 @@
+# Evolution
+A simple cellular automaton program exibiting evolution.
+Eventually it may become a single player puzzle style game...  Or maybe not...
