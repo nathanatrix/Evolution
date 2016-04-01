@@ -4,6 +4,8 @@
 #include "stdlib.h"
 #include "arraylist.h"
 
+//Hello Nathan!!
+
 /*
  * Increases the size of the array
  * Returns 0 on success and -1 on invalid arguments
