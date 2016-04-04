@@ -1,5 +1,3 @@
-//Wow i fuckin hate hashmaps holy shit these suck
-
 /*
  * Implements the hashmap.h file
  */
@@ -16,7 +14,8 @@ int hashmap_Hash(cell_t cell, hashmap_t* hashmap);
 
 /*
  * Expands the hashmap to twice its size
- * Returns 0 on success and -1 on invalid arguments
+ * Returns 0 on success, -1 on invalid arguments,
+ * and -2 on failure
  */
 int hashmap_Expand(hashmap_t* hashmap);
 
@@ -24,9 +23,11 @@ int hashmap_Expand(hashmap_t* hashmap);
 
 /*
  * Initializes a new (empty) hashmap and returns it
+ * Returns a null pointer on failure
  */
 hashmap_t* hashmap_InitHashmap() {
 	hashmap_t* hashmap = (hashmap_t*)malloc(sizeof(hashmap_t));
+	if(hashmap == 0) return 0;
 	hashmap->size = HASHMAP_INITIALSIZE;
 	hashmap->maxPercent = HASHMAP_INITIALMAX;
 	hashmap->numCells = 0;
@@ -56,7 +57,11 @@ int hashmap_DestoryHashmap(hashmap_t* hashmap) {
 int hashmap_Add(cell_t cell, hashmap_t* hashmap) {
 	if(hashmap == 0) return -1;
 	if(arraylist_Contains(cell, hashmap->array[hashmap_Hash(cell, hashmap)])) return 0; //Already in the hashmap
-	if(hashmap->numCells * 100 > hashmap->size * hashmap->maxPercent) hashmap_Expand(hashmap); //Exceeded the max percent
+	if(hashmap->numCells * 100 > hashmap->size * hashmap->maxPercent) { //Exceeded the max percent
+		if(hashmap_Expand(hashmap) < 0) { //Expand failed
+			return -2;
+		}
+	}
 	hashmap->numCells++;
 	return arraylist_Add(cell, hashmap->array[hashmap_Hash(cell, hashmap)]->numCells, hashmap->array[hashmap_Hash(cell, hashmap)]);
 }
@@ -79,8 +84,9 @@ int hashmap_Contains(cell_t cell, hashmap_t* hashmap) {
 int hashmap_Remove(cell_t cell, hashmap_t* hashmap) {
 	if(hashmap == 0) return -1;
 	if(1 - arraylist_Contains(cell, hashmap->array[hashmap_Hash(cell, hashmap)])) return 0; //Does not contain cell
-	hashmap->numCells--;
-	return arraylist_RemoveCell(cell, hashmap->array[hashmap_Hash(cell, hashmap)]);
+	int x = arraylist_RemoveCell(cell, hashmap->array[hashmap_Hash(cell, hashmap)]);
+	if(x == 0) hashmap->numCells--; //The removal succeeded
+	return x;
 }
 
 /*
@@ -110,18 +116,29 @@ int hashmap_Hash(cell_t cell, hashmap_t* hashmap) {
 
 int hashmap_Expand(hashmap_t* hashmap) {
 	if(hashmap == 0) return -1;
-	hashmap->size *= 2; //Note: this is needed for the hash function to work
-	hashmap->numCells = 0; //Reset the number of cells because we will be changing it later
-	arraylist_t** newArray = (arraylist_t**)malloc(sizeof(arraylist_t*) * hashmap->size);
+
+	arraylist_t** newArray = (arraylist_t**)malloc(sizeof(arraylist_t*) * hashmap->size * 2);
+	if(newArray == 0) return -2; //malloc failure
 	arraylist_t** oldArray = hashmap->array; //Hold onto the old array
+
+	hashmap->size *= 2; //Note: this is needed for the hash function to work
+	int numCells = hashmap->numCells; //Hold onto in case of failure
+	hashmap->numCells = 0; //Reset the number of cells because we will be changing it later
+
 	int i, j;
 	for(i = 0; i < hashmap->size; i++) {
 		newArray[i] = arraylist_InitArraylist(); //Initialize the new arrays
+		if(newArray[i] == 0) return -2; //InitArraylist failed
 	}
 	hashmap->array = newArray; //Set the new array into the hashmap, it's still empty
 	for(i=0; i < hashmap->size / 2; i++) { //Iterate through arrays
 		for(j=0; j < oldArray[i]->numCells; j++) { //Iterate through cells in array
-			hashmap_Add(oldArray[i]->array[j], hashmap); //Add the cells to the new array
+			if(hashmap_Add(oldArray[i]->array[j], hashmap) < 0) { //Add the cells to the new array
+				hashmap->size /= 2; //Reset the hashmap
+				hashmap->array = oldArray;
+				hashmap->numCells = numCells;
+				return -2; //Add failed
+			}
 		}
 	}
 	for(i = 0; i < hashmap->size / 2; i++) {

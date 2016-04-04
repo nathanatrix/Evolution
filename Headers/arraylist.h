@@ -1,8 +1,6 @@
 /*
  * A simple ArrayList to hold cells
  * Primarly intended for use in hashmap
- * TODO: Add more error checking to destroy method
- * TODO: Check to make sure arraylist has fields before using them
  */
 
 #ifndef ARRAYLIST_H_
@@ -19,6 +17,7 @@ typedef struct{
 
 /*
  * Initializes a new array list and returns a pointer to it
+ * Returns a null pointer on failure
  */
 arraylist_t* arraylist_InitArraylist();
 
@@ -30,7 +29,8 @@ int arraylist_DestoryArraylist(arraylist_t* arraylist);
 
 /*
  * Adds the cell to the arraylist at the given position
- * Returns 0 on success and -1 on invalid arguments
+ * Returns 0 on success, -1 on invalid arguments, and
+ * -2 on failure
  */
 int arraylist_Add(cell_t cell, int index, arraylist_t* arraylist);
 /*

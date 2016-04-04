@@ -1,10 +1,7 @@
 /*
  * Represents a simple hashmap to hold cells
  * Note: This hashmap cannot hold dupicate cells
- * TODO: Add more error checking to destroy method
  * TODO: Fix the hash method when cells are implemented
- * TODO: Make numItems more secure in add/remove methods
- * TODO: Check to make sure hashmap has fields before using them
  */
 
 #ifndef HASHMAP_H_
@@ -23,6 +20,7 @@ typedef struct{
 
 /*
  * Initializes a new (empty) hashmap and returns it
+ * Returns a null pointer on failure
  */
 hashmap_t* hashmap_InitHashmap();
 
