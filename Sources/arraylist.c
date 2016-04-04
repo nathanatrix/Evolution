@@ -12,6 +12,8 @@
  */
 int arraylist_IncreaseSize(arraylist_t* arraylist);
 
+/************************************************** PUBLIC METHODS ***********************************************/
+
 /*
  * Initializes a new array list and returns a pointer to it
  */
@@ -22,6 +24,17 @@ arraylist_t* arraylist_InitArraylist() {
 	arraylist->array = (cell_t*)malloc(sizeof(cell_t) * arraylist->size);
 	return arraylist;
 }
+
+/*
+ * Destroys the given arraylist, excluding the pointer to it
+ * Returns 0 on success and -1 on invalid argument
+ */
+int arraylist_DestoryArraylist(arraylist_t* arraylist) {
+	if(arraylist == 0) return -1;
+	free(arraylist->array);
+	return 0;
+}
+
 /*
  * Adds the cell to the arraylist at the given position
  * Returns 0 on success and -1 on invalid arguments
@@ -50,6 +63,21 @@ int arraylist_Get(int index, arraylist_t* arraylist, cell_t* cell) {
 	*cell = arraylist->array[index];
 	return 0;
 }
+
+/*
+ * Checks if the arraylist contains the given cell
+ * Returns 1 if it does, 0 if it doesn't, and -1 on
+ * invalid arguments
+ */
+int arraylist_Contains(cell_t cell, arraylist_t* arraylist) {
+	if(arraylist == 0) return -1;
+	int i;
+	for(i = 0; i < arraylist->numCells; i++) {
+		if(arraylist->array[i] == cell) return 1;
+	}
+	return 0;
+}
+
 /*
  * Removes the cell at the given position from the arraylist and puts it in the cell pointer
  * Returns 0 on success and -1 on invalid arguments
@@ -65,6 +93,39 @@ int arraylist_Remove(int index, arraylist_t* arraylist, cell_t* cell) {
 	arraylist->numCells--;
 	return 0;
 }
+
+/*
+ * Removes all copies of the given cell from the arraylist
+ * If the cell is not in the arraylist, does nothing
+ * Returns 0 on success and -1 on invalid arguments
+ */
+int arraylist_RemoveCell(cell_t cell, arraylist_t* arraylist) {
+	if(arraylist == 0) return -1;
+	int i;
+	for(i = 0; i < arraylist->numCells; i++) {
+		if(arraylist->array[i] == cell) {
+			arraylist_Remove(i--, arraylist, 0); //Remove the matching element and back up a step
+		}
+	}
+	return 0;
+}
+
+/*
+ * Prints the arraylist to the console in a readable form
+ * Returns 0 on success and -1 on invalid arguments
+ */
+int arraylist_Print(arraylist_t* arraylist) {
+	if(arraylist == 0) return -1;
+	printf("[");
+	int i;
+	for(i = 0; i < arraylist->numCells; i++) {
+		printf(i==0 ? "%d" : ",%d", arraylist->array[i]);
+	}
+	printf("]");
+	return 0;
+}
+
+/*************************************** PRIVATE METHODS ***************************************************/
 
 int arraylist_IncreaseSize(arraylist_t* arraylist) {
 	if(arraylist == 0) return -1;

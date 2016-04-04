@@ -1,7 +1,7 @@
 #include "stdio.h"
+#include "stdlib.h"
+#include "hashmap.h"
 
 int main() {
-	printf("Hello World!"); //Hello Justin
-	//Testing some more...And even more
 	return 0;
 }
